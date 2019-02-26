@@ -13,7 +13,7 @@ MemoryGame = function(gs) {
     this.cards = new Array(this.numCartas);
     this.msg = "Juego de parejas";
     this.parejasRestantes = 8;
-    
+
     this.volteadas = 0;
     this.card1, this.card2;
     this.blockClicks = false;
@@ -81,11 +81,11 @@ MemoryGame = function(gs) {
             return null;
 
         //Si la carta no ha sido encontrada, realizamos acciones para voltearla y poder comprobar si es pareja más tarde
-        if(this.cards[cardId].estadoActual != 2 && this.blockClicks != true) {
+        if(this.cards[cardId].getEstado() != 2 && this.blockClicks != true) {
             //Contamos cuantas se han volteado
-            if(this.cards[cardId].estadoActual == 0)
+            if(this.cards[cardId].getEstado() == 0)
                 ++this.volteadas;
-            else if(this.cards[cardId].estadoActual == 1)
+            else if(this.cards[cardId].getEstado() == 1)
                 --this.volteadas;
 
             //Guardamos el número de la carta
@@ -100,9 +100,9 @@ MemoryGame = function(gs) {
 
         //Comprobamos si es pareja
         if(this.volteadas == 2 && this.blockClicks != true) {
-            if(this.cards[this.card1].id == this.cards[this.card2].id) {
-                this.cards[this.card1].estadoActual = 2;
-                this.cards[this.card2].estadoActual = 2;
+            if(this.cards[this.card1].compareTo(this.cards[this.card2])) {
+                this.cards[this.card1].found();
+                this.cards[this.card2].found();
                 this.msg = "¡Pareja!";
                 --this.parejasRestantes;
                 }
@@ -110,8 +110,8 @@ MemoryGame = function(gs) {
                 this.msg = "Vuelve a intentarlo";
                 this.blockClicks = true;
                 setTimeout(() => {
-                    this.cards[this.card1].estadoActual = 0;
-                    this.cards[this.card2].estadoActual = 0;
+                    this.cards[this.card1].flip();
+                    this.cards[this.card2].flip();
                     this.blockClicks = false;
                 }, 1000);
             }
@@ -159,6 +159,10 @@ MemoryGameCard = function(id) {
      */
     this.found = function() {
         this.estadoActual = estado.encontrada;
+    }
+
+    this.getEstado = function() {
+        return this.estadoActual;
     }
 
     /**
