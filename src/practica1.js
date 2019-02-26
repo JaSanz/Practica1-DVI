@@ -8,10 +8,15 @@ var MemoryGame = MemoryGame || {};
 MemoryGame = function(gs) {
 
     this.gs = gs;
+
     this.numCartas = 16;
-    this.playing = true;
-    this.pairsLeft = 8;
     this.cards = new Array(this.numCartas);
+    this.msg = "Juego de parejas";
+    this.parejasRestantes = 8;
+    
+    this.volteadas = 0;
+    this.card1, this.card2;
+    this.blockClicks = false;
 
     /**
      * Inicializa el juego creando las cartas (2 de cada tipo), desordenándolas y comenzando 
@@ -71,6 +76,51 @@ MemoryGame = function(gs) {
      */
     this.onClick = function(cardId) {
 
+        //Comprobamos que no se pulse fuera del tablero
+        if(cardId < 0 || cardId == null)
+            return null;
+
+        //Si la carta no ha sido encontrada, realizamos acciones para voltearla y poder comprobar si es pareja más tarde
+        if(this.cards[cardId].estadoActual != 2 && this.blockClicks != true) {
+            //Contamos cuantas se han volteado
+            if(this.cards[cardId].estadoActual == 0)
+                ++this.volteadas;
+            else if(this.cards[cardId].estadoActual == 1)
+                --this.volteadas;
+
+            //Guardamos el número de la carta
+            if(this.volteadas % 2 == 0)
+                this.card1 = cardId;
+            else
+                this.card2 = cardId;
+            
+            //Volteamos
+            this.cards[cardId].flip();
+        }
+
+        //Comprobamos si es pareja
+        if(this.volteadas == 2 && this.blockClicks != true) {
+            if(this.cards[this.card1].id == this.cards[this.card2].id) {
+                this.cards[this.card1].estadoActual = 2;
+                this.cards[this.card2].estadoActual = 2;
+                this.msg = "¡Pareja!";
+                --this.parejasRestantes;
+                }
+            else {
+                this.msg = "Vuelve a intentarlo";
+                this.blockClicks = true;
+                setTimeout(() => {
+                    this.cards[this.card1].estadoActual = 0;
+                    this.cards[this.card2].estadoActual = 0;
+                    this.blockClicks = false;
+                }, 1000);
+            }
+            this.volteadas = 0;
+        }
+
+        //Si todas las parejas se han formado, mostramos mensaje de victoria
+        if(this.parejasRestantes == 0)
+            this.msg = "¡Has ganado!"
     }
 };
 
